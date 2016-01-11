@@ -8,11 +8,15 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by foolim on 8/12/15.
  */
 public class FooJsonDateTimeMessageParser extends JsonMessageParser {
+    private static final Logger LOG = LoggerFactory.getLogger(FooJsonDateTimeMessageParser.class);
+
     public static DateTimeFormatter badAdServerFormat = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     public FooJsonDateTimeMessageParser(SecorConfig config) {
@@ -22,6 +26,8 @@ public class FooJsonDateTimeMessageParser extends JsonMessageParser {
     @Override
     public long extractTimestampMillis(final Message message) {
         JSONObject jsonObject = (JSONObject) JSONValue.parse(message.getPayload());
+        LOG.debug("FooJsonDateTimeMessageParser: jsonObject: " + jsonObject.toJSONString());
+
         if (jsonObject != null) {
             Object fieldValue = jsonObject.get(mConfig.getMessageTimestampName());
             if (fieldValue != null) {
