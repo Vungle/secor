@@ -26,9 +26,9 @@ public class FooJsonDateTimeMessageParser extends JsonMessageParser {
     @Override
     public long extractTimestampMillis(final Message message) {
         JSONObject jsonObject = (JSONObject) JSONValue.parse(message.getPayload());
-        LOG.debug("FooJsonDateTimeMessageParser: jsonObject: " + jsonObject.toJSONString());
-
         if (jsonObject != null) {
+            LOG.debug("FooJsonDateTimeMessageParser: jsonObject: " + jsonObject.toJSONString());
+
             Object fieldValue = jsonObject.get(mConfig.getMessageTimestampName());
             if (fieldValue != null) {
                 String timestampValue = fieldValue.toString();
