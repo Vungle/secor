@@ -5,7 +5,7 @@ import com.pinterest.secor.common.SecorConfig;
 import com.pinterest.secor.message.Message;
 import com.timgroup.statsd.NonBlockingStatsDClient;
 import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
+import net.minidev.json.parser.JSONParser;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -32,16 +32,19 @@ public class FooJsonDateTimeMessageParser extends JsonMessageParser {
     @Override
     public long extractTimestampMillis(final Message message) {
 
+        JSONObject jsonObject;
         // step 1: parse the message into json object
-        JSONObject jsonObject = (JSONObject) JSONValue.parse(message.getPayload());
-        if (jsonObject == null) {
-            LOG.error("FooJsonDateTimeMessageParser: Invalid Json: " + message);
+        try {
+            jsonObject = (JSONObject) (new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE)).parse(message.getPayload());
+        } catch (Throwable e) {
+            LOG.error("FooJsonDateTimeMessageParser: Invalid Json: " + message, e);
             if (mStatsDClient != null) {
                 mStatsDClient.incrementCounter("secor.kafka." + message.getTopic().toLowerCase() + ".failed.json_parsing.count");
             }
 
             // send the bad messages back to 1970s
             return 0;
+
         }
 
         LOG.debug("FooJsonDateTimeMessageParser: JsonObject: " + message);
@@ -75,7 +78,7 @@ public class FooJsonDateTimeMessageParser extends JsonMessageParser {
             }
             return ts;
         } catch (Throwable e) {
-            LOG.error("FooJsonDateTimeMessageParser: Invalid TimeStamp: " + message);
+            LOG.error("FooJsonDateTimeMessageParser: Invalid TimeStamp: " + message, e);
             if (mStatsDClient != null) {
                 mStatsDClient.incrementCounter("secor.kafka." + message.getTopic().toLowerCase() + ".failed.date_parsing.count");
             }
